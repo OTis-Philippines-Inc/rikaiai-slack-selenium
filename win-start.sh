@@ -3,7 +3,7 @@
 source .env
 
 # Mac/Linux activate environment
-source rikaiai-slack-selenium-venv/Scripts/activate
+source .venv
 
 # Install dependencies
 pip install -r requirements.txt

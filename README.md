@@ -9,7 +9,7 @@ All instructions below assume that you are working within the parent repository 
 `rikaiai-slack-selenium/`
 2. Create a virtual environment by running the following command:
 ```sh
-python -m venv rikaiai-slack-selenium-venv
+python -m venv .venv
 ```
 3. Activate the virtual environment:
 On Windows, run:
