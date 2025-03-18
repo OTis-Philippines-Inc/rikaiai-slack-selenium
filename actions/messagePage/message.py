@@ -1,6 +1,6 @@
-from seleniumbase import BaseCase
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+from seleniumbase import BaseCase
 import os, sys
 
 # Add python files within project directory for import
@@ -57,7 +57,7 @@ class Message:
         """
         # Traverse to channel
         self._traverse_to_channel(sb, channel, attr_name)
-        sb.sleep(5)
+        sb.sleep(3)
         messages: object = sb.find_elements(".offscreen")
         
         # This is to mimic user interaction authenticity
@@ -66,18 +66,19 @@ class Message:
         # Search in thread for the name and message sent based on index count
         for msg in messages:
             if msg.text and msg.text == username:
-                if index == 0:
-                    # Edit message
-                    action.move_to_element(msg).perform()
-                    sb.click("button[data-qa='more_message_actions']", timeout=10)
-                    sb.click("button[data-qa='edit_message']", timeout=10)
-                    
-                    sb.send_keys("div[aria-label='Edit message']", "CTRL+A")
-                    sb.send_keys("div[aria-label='Edit message']", "BACKSPACE")
-                    sb.send_keys("div[aria-label='Edit message']", sub)
-                    sb.send_keys("div[aria-label='Edit message']", "ENTER")
-                    break
-                index -= 1
+                sb.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", msg)
+                sb.sleep(3)
+                # Edit message
+                action.move_to_element(msg).perform()
+                sb.click("button[data-qa='more_message_actions']", timeout=7)
+                sb.click("button[data-qa='edit_message']", timeout=7)
+                
+                sb.send_keys("div[aria-label='Edit message']", Keys.CONTROL + "a")
+                sb.send_keys("div[aria-label='Edit message']", Keys.BACKSPACE)
+                sb.send_keys("div[aria-label='Edit message']", sub)
+                sb.sleep(1)
+                sb.send_keys("div[aria-label='Edit message']", Keys.ENTER)
+                break
 
     def delete_message(self, sb: BaseCase, username: str, index: int, channel: str, attr_name: str) -> None:
         """
