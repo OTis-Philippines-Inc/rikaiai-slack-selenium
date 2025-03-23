@@ -26,20 +26,13 @@ pip install -r requirements.txt
 ```
 
 ## Running the automation testing scripts
-
-### Using `sbase` by Seleniumbase
-1. In your terminal, ensure you are in the `rikaiai-slack-selenium/` directory before running the following command:
-```sh
-sbase gui
-```
-
 ### Using Shell Scripts
 In the parent directory `rikaiai-slack-selenium/`, run this command;
-- On Windows, run:
+- Using bash scripts:
 ```sh
-./win-start.sh
+./run.sh
 ```
-- On macOS and Linux, run:
+- Using python scripts:
 ```sh 
-./start.sh 
+./run.py 
 ```
