@@ -107,6 +107,7 @@ class Message:
                     action.move_to_element(msg).perform()
                     sb.click("button[data-qa='more_message_actions']", timeout=10)
                     sb.click("button[data-qa='delete_message']", timeout=10)
+                    sb.click("button[aria-label='Delete']", timeout=10)
                     break
                 index -= 1
 

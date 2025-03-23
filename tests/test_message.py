@@ -12,10 +12,10 @@ from message import Message
 BaseCase.main(__name__, __file__)
 
 class MessagePage(BaseCase):
-    def test_message_update(self) -> None:
+    def test_message_delete(self) -> None:
         Login().login_to_page(self)
         self.wait(5)
-        Message().update_message(self, "Trest", "Isiah Jordan", 0,  "juan-autoamted-testing", "channel_sidebar_name_juan-autoamted-testing")
+        Message().delete_message(self, "Isiah Jordan", 0,  "juan-autoamted-testing", "channel_sidebar_name_juan-autoamted-testing")
         self.wait(5)
 
         #import pdb; pdb.set_trace()
