@@ -34,5 +34,5 @@ In the parent directory `rikaiai-slack-selenium/`, run this command;
 ```
 - Using python scripts:
 ```sh 
-./run.py 
+python3 run.py 
 ```
