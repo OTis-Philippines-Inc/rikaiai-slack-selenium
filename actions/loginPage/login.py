@@ -28,17 +28,18 @@ class Login:
         sb.wait_for_ready_state_complete()
 
         sb.type("input[data-qa='email_field']", cfg.gmail)
+        time.sleep(1)
         sb.click("button[data-qa='submit_button']")
         sb.wait_for_ready_state_complete()
 
         # verification_code = "123456"  # Replace this with the actual code
-
+        time.sleep(5)
         # Fetch verification code
         verification_code = get_verification_code()
         if not verification_code:
             sb.fail("Verification code not found!")
 
-
+        time.sleep(2)
         # Loop through each digit and type it into the corresponding field
         for i, digit in enumerate(verification_code, start=1):
             input_field = sb.find_element(f'input[aria-label="digit {i} of 6"]')

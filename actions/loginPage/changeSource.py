@@ -65,4 +65,4 @@ class Test:
         sb.type("input[name='change_source_language']", source_language)
         input_field = sb.find_element("input[name='change_source_language']")
         input_field.send_keys(Keys.ENTER)
-        time.sleep(10)  # Small delay to ensure it's active
+        time.sleep(7)  # Small delay to ensure it's active
