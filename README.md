@@ -36,6 +36,19 @@ python.exe -m pip install --upgrade pip
 
 ## Running the automation testing scripts
 
+### Using `sbase` by Seleniumbase
+1. In your terminal, ensure you are in the `rikaiai-slack-selenium/` directory before running the following command:
 ```sh
-pytest actions/loginPage/login.py 
-```  
+sbase gui
+```
+
+### Using Shell Scripts
+In the parent directory `rikaiai-slack-selenium/`, run this command;
+- On Windows, run:
+```sh
+./win-start.sh
+```
+- On macOS and Linux, run:
+```sh 
+./start.sh 
+```
