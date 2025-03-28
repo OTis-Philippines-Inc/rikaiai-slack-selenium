@@ -1,6 +1,7 @@
 import firebase_admin
 import re
 from firebase_admin import auth, credentials
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 import base64
@@ -17,7 +18,8 @@ if not os.path.exists(json_path):
 
 cred = credentials.Certificate(json_path)  # Load Firebase credentials
 
-firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred)
 
 def send_verification_email(user_email):
     """Trigger email verification via Firebase Authentication."""
@@ -29,19 +31,25 @@ def send_verification_email(user_email):
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 def get_gmail_service():
-    """Authenticate using OAuth and return Gmail API service."""
+    """Authenticate using OAuth and return Gmail API service with token storage."""
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    creds_path = os.path.join(BASE_DIR, "../.credentials/token.json")
+    secret_path = os.path.join(BASE_DIR, "../.credentials/client_secret.json")
 
-    # Get absolute path to client_secret.json inside credentials/
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get current script directory
-    json_path = os.path.join(BASE_DIR, "../.credentials/client_secret.json")  # Adjust filename if needed
+    creds = None
 
-    # Verify if file exists before proceeding
-    if not os.path.exists(json_path):
-        raise FileNotFoundError(f"Client secret file not found: {json_path}")
+    # Load existing token.json if it exists
+    if os.path.exists(creds_path):
+        creds = Credentials.from_authorized_user_file(creds_path, SCOPES)
 
-    # Authenticate using OAuth
-    flow = InstalledAppFlow.from_client_secrets_file(json_path, SCOPES)
-    creds = flow.run_local_server(port=8080)  # Ensure it matches the URI set in Google Cloud
+    # If no valid credentials, perform OAuth authentication
+    if not creds or not creds.valid:
+        flow = InstalledAppFlow.from_client_secrets_file(secret_path, SCOPES)
+        creds = flow.run_local_server(port=8080, access_type="offline", prompt="consent")
+
+        # Save new credentials for future use
+        with open(creds_path, "w") as token:
+            token.write(creds.to_json())
 
     return build("gmail", "v1", credentials=creds)
 
