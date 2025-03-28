@@ -17,9 +17,17 @@ class LanguageModalTest(BaseCase):
     def test_language_modal(self):
         self.record.start_recording("test_language_modal")
         Login().direct_url(self)
-        LanguageModal().select_channel(self)
-        LanguageModal().enter_command(self, "/config-rikaiai language")
-        self.wait(10)
+        modal = LanguageModal()
+        
+        modal.select_channel(self)
+        modal.enter_command(self, "/config-rikaiai language")
+        self.wait(2)
+        
+        modal.select_target_scope(self)
+        modal.select_source_language(self)
+        modal.select_target_languages(self)
+        self.click('button[data-qa="wizard_modal_next"]')
+        self.wait(5)
 
         self.record.stop_and_save_recording()
         self.driver.close()

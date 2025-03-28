@@ -16,22 +16,32 @@ class LanguageModal:
         sb.type("div.ql-editor[role='textbox']", command)
         sb.send_keys("div.ql-editor[role='textbox']", "\n")
 
-    '''
-    def select_target_scope(self, sb, target_scope):
-        Target Scope
-        <div class="p-block_kit_input_block__element c-search-select" data-qa="language_settings_modal_change_target_scope"><div role="presentation" class="c-select_input__wrapper c-select_input--medium c-select_input--with_icon_right" data-qa="language_settings_modal_change_target_scope-wrapper" style="width: 100%;"><div class="c-select_input__input_container"><input spellcheck="false" aria-autocomplete="list" aria-expanded="true" aria-owns="language_settings_modal_change_target_scope-language_settings_modal_target_scope_input-2daceb40_38fd_49b4_9539_231de7efe86e_listbox" aria-required="true" aria-label="Whether to apply settings to the workspace or this channel only" aria-labelledby="language_settings_modal_change_target_scope-language_settings_modal_target_scope_input-2daceb40_38fd_49b4_9539_231de7efe86e-label" aria-describedby="language_settings_modal_change_target_scope-language_settings_modal_target_scope_input-2daceb40_38fd_49b4_9539_231de7efe86e_initial-focus" data-qa="language_settings_modal_change_target_scope-input" role="combobox" aria-invalid="false" autocomplete="off" class="c-input_text c-select_input" id="language_settings_modal_change_target_scope-language_settings_modal_target_scope_input-2daceb40_38fd_49b4_9539_231de7efe86e" name="language_settings_modal_change_target_scope-language_settings_modal_target_scope_input-2daceb40_38fd_49b4_9539_231de7efe86e" type="text" value="" placeholder="Whether to apply settings to the workspace or this channel only"></div><div class="c-select_input__icon_container"><span class="c-select_input__icon"><svg data-xh2="true" data-qa="caret-down" aria-hidden="true" viewBox="0 0 20 20" class="" style="--s: 20px;"><path fill="currentColor" fill-rule="evenodd" d="M5.72 7.47a.75.75 0 0 1 1.06 0L10 10.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-3.75 3.75a.75.75 0 0 1-1.06 0L5.72 8.53a.75.75 0 0 1 0-1.06" clip-rule="evenodd"></path></svg></span></div></div></div>
+    def select_target_scope(self, sb):
+        sb.click("[data-qa='language_settings_modal_change_target_scope']")
+        sb.click("[data-qa='language_settings_modal_change_target_scope_option_1']") # option_0 for Workspace, option_1 for Channel
+        sb.wait(5)
 
-        Workspace
-        <div aria-selected="true" class="c-select_options_list__option c-select_options_list__option--selected" data-qa="language_settings_modal_change_target_scope_option_0" id="language_settings_modal_change_target_scope-language_settings_modal_target_scope_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16_option_0" role="option" tabindex="-1" aria-setsize="2" aria-posinset="1" style="height: 28px; left: 0px; position: absolute; top: 0px; width: 100%;"><span class="c-select_options_list__selected" aria-hidden="true"></span><span data-qa="workspace" class="c-select_options_list__option_label"><div class="p-block-kit-select_options"><div class="p-plain_text_element" data-qa="bk-plain_text_element"><span dir="auto">Workspace</span></div></div></span></div>
+    def select_source_language(self, sb):
+        sb.type("[data-qa='language_settings_modal_change_source_language-input']", cfg.source_language)
+        sb.wait_for_element_visible("[data-qa='language_settings_modal_change_source_language-options-list']", timeout=5)
+        sb.click(f"//div[contains(@class, 'c-select_options_list__option')]//div[contains(@class, 'p-plain_text_element')]//span[text()='{cfg.source_language}']/ancestor::div[contains(@class, 'c-select_options_list__option')]")
 
-        Channel
-        <div aria-selected="false" class="c-select_options_list__option" data-qa="language_settings_modal_change_target_scope_option_1" id="language_settings_modal_change_target_scope-language_settings_modal_target_scope_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16_option_1" role="option" tabindex="-1" aria-setsize="2" aria-posinset="2" style="height: 28px; left: 0px; position: absolute; top: 28px; width: 100%;"><span data-qa="channel" class="c-select_options_list__option_label"><div class="p-block-kit-select_options"><div class="p-plain_text_element" data-qa="bk-plain_text_element"><span dir="auto">Channel</span></div></div></span></div>
+    def select_target_languages(self, sb):
+        sb.click("[data-qa='language_settings_modal_change_target_languages-input']")
+        
+        initial_input = cfg.target_languages[:3]
+        sb.type("[data-qa='language_settings_modal_change_target_languages-input']", initial_input)
+        
+        sb.wait(1)
 
-    def select_source_language(self, sb, source_language[]):
-        Source Language
-        <input spellcheck="false" aria-autocomplete="list" aria-owns="language_settings_modal_change_source_language-language_settings_modal_source_language_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16_listbox" aria-required="true" aria-label="First select the source language" aria-labelledby="" aria-describedby="language_settings_modal_change_source_language-language_settings_modal_source_language_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16_initial-focus" data-qa="language_settings_modal_change_source_language-input" role="combobox" aria-invalid="false" autocomplete="off" class="c-input_text c-select_input" id="language_settings_modal_change_source_language-language_settings_modal_source_language_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16" name="language_settings_modal_change_source_language-language_settings_modal_source_language_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16" placeholder="First select the source language" type="text" value="" aria-expanded="false">
-
-    def select_target_languages(self, sb, target_languages[]):
-        Target Languages
-        <input spellcheck="false" aria-autocomplete="list" aria-owns="language_settings_modal_change_source_language-language_settings_modal_source_language_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16_listbox" aria-required="true" aria-label="First select the source language" aria-labelledby="" aria-describedby="language_settings_modal_change_source_language-language_settings_modal_source_language_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16_initial-focus" data-qa="language_settings_modal_change_source_language-input" role="combobox" aria-invalid="false" autocomplete="off" class="c-input_text c-select_input" id="language_settings_modal_change_source_language-language_settings_modal_source_language_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16" name="language_settings_modal_change_source_language-language_settings_modal_source_language_input-580bafe3_6bf0_466f_8ef7_be72d21f8d16" placeholder="First select the source language" type="text" value="" aria-expanded="false">
-    '''
+        if sb.is_element_visible("[data-qa='language_settings_modal_change_target_languages-options-list']"):
+            option_xpath = (
+                "//div[contains(@class, 'c-select_options_list__option')]"
+                "//div[contains(@class, 'p-plain_text_element')]"
+                f"//span[text()='{cfg.target_languages}']"
+                "/ancestor::div[contains(@class, 'c-select_options_list__option')]"
+            )
+            sb.click(option_xpath)
+            
+        sb.wait(1)
+        sb.assert_element_present(f"//span[contains(text(), '{cfg.target_languages}')]")
