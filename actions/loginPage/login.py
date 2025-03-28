@@ -5,22 +5,24 @@ import os, sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "config")))
 
-from settings import USER, SITE
 from otp import fetch_slack_otp
 
 class Login:
-    def login_to_page(self, sb: BaseCase) -> None:
+    def login_to_page(self, sb: BaseCase, email: str, site: str) -> None:
         """
             Automates login and otp process using Google API.
 
             ----
             sb: test case associated with the BaseCase class.
+            email: gmail based email.
+            site: web location url.
+
         """
         # Open Slack login page
-        sb.get(SITE)
+        sb.get(site)
 
         # Enter login credentials
-        sb.type('input[name="email"]', USER)
+        sb.type('input[name="email"]', email)
         sb.click('button[type="submit"]')
 
         # Fetch OTP code from email
