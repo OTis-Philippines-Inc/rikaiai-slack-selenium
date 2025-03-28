@@ -22,6 +22,12 @@ SORT_OPT: object = np.array([
         "Desc" # Descending order option
     ])
 
+# What would be used to test
+CHANNEL: object = np.array([
+        "rikaiai-features",
+        "social"
+    ])
+
 # Project Context
 DIR_PATH: str = os.path.join(os.path.dirname(__file__), "..", "api")
 DATE_FORMAT: str ="%a, %d %b %Y %H:%M:%S %z"
@@ -34,5 +40,4 @@ EMAIL: str = CONFIG["GMAIL"]
 PASSWORD: str = CONFIG["GMAIL_PASSWORD"]
 SITE: str = CONFIG["STAGING_URL"]
 WORKSPACE: str = CONFIG["STAGING_NAME"]
-CHANNEL: str = CONFIG["CHANNEL"]
 BROWSER: str = "firefox"
