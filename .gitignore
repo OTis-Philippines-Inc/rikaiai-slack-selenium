@@ -241,3 +241,7 @@ tags
 *recordings/
 *.html
 *latest_logs
+
+# macOS system files
+.DS_Store
+**/.DS_Store
