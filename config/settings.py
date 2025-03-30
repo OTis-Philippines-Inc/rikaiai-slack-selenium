@@ -14,8 +14,8 @@ class Settings:
         self.staging_name = os.getenv("STAGING_NAME")
         
         # Billing settings
-        self.billing_plan = os.getenv("BILLING_PLAN", "basic")
-        self.billing_amount = os.getenv("BILLING_AMOUNT", "9.99")
+        self.billing_plan = os.getenv("BILLING_PLAN", "trial")
+        self.billing_amount = os.getenv("BILLING_AMOUNT", "0.00")
         self.billing_currency = os.getenv("BILLING_CURRENCY", "USD")
         self.billing_cycle = os.getenv("BILLING_CYCLE", "monthly")
         self.billing_status = os.getenv("BILLING_STATUS", "active")
@@ -24,22 +24,31 @@ class Settings:
         self.billing_card_brand = os.getenv("BILLING_CARD_BRAND", "visa")
         self.billing_card_expiry = os.getenv("BILLING_CARD_EXPIRY", "12/25")
         
-        # Additional billing settings
-        self.billing_invoice_retention_days = int(os.getenv("BILLING_INVOICE_RETENTION_DAYS", "365"))
-        self.billing_max_payment_methods = int(os.getenv("BILLING_MAX_PAYMENT_METHODS", "3"))
-        self.billing_available_plans = os.getenv("BILLING_AVAILABLE_PLANS", "basic,premium,enterprise").split(",")
+        # Billable points settings
+        self.billing_points_base = int(os.getenv("BILLING_POINTS_BASE", "50000"))  # Trial plan points
+        self.billing_points_additional_cost = float(os.getenv("BILLING_POINTS_ADDITIONAL_COST", "3.99"))  # Cost per 100k additional points
+        self.billing_points_overage_rate = float(os.getenv("BILLING_POINTS_OVERAGE_RATE", "0.00004"))  # Rate per point after 1M
+        self.billing_points_limit = int(os.getenv("BILLING_POINTS_LIMIT", "50000"))  # Default points limit
+        
+        # Plan features
+        self.billing_available_plans = os.getenv("BILLING_AVAILABLE_PLANS", "trial,paid").split(",")
         self.billing_plan_features = {
-            "basic": os.getenv("BILLING_BASIC_FEATURES", "Feature 1,Feature 2,Feature 3").split(","),
-            "premium": os.getenv("BILLING_PREMIUM_FEATURES", "Feature 1,Feature 2,Feature 3,Feature 4").split(","),
-            "enterprise": os.getenv("BILLING_ENTERPRISE_FEATURES", "Feature 1,Feature 2,Feature 3,Feature 4,Feature 5").split(",")
+            "trial": os.getenv("BILLING_TRIAL_FEATURES", "50k billable points (one-time),Basic support,Parallel translations,Custom language pairs,Basic MTL and LLM-based translations").split(","),
+            "paid": os.getenv("BILLING_PAID_FEATURES", "200k billable points base,Priority support,Parallel translations,Custom language pairs,State-of-the-art MTL and LLM-based translations").split(",")
         }
+        
         self.billing_plan_prices = {
-            "basic": os.getenv("BILLING_BASIC_PRICE", "9.99"),
-            "premium": os.getenv("BILLING_PREMIUM_PRICE", "19.99"),
-            "enterprise": os.getenv("BILLING_ENTERPRISE_PRICE", "49.99")
+            "trial": os.getenv("BILLING_TRIAL_PRICE", "0.00"),
+            "paid": os.getenv("BILLING_PAID_PRICE", "7.99")
         }
-        self.billing_supported_countries = os.getenv("BILLING_SUPPORTED_COUNTRIES", "US,UK,CA,AU").split(",")
+        
+        # Region settings
+        self.billing_supported_regions = os.getenv("BILLING_SUPPORTED_REGIONS", "US,UK,CA,AU,JP,KR,SG,TW,HK,MY").split(",")
+        self.billing_unsupported_regions = os.getenv("BILLING_UNSUPPORTED_REGIONS", "EU,EEA,CN,RU,IR,KP,SY,YE,SO,SS").split(",")
+        
+        # Performance settings
         self.billing_network_timeout = int(os.getenv("BILLING_NETWORK_TIMEOUT", "30"))
+        self.billing_invoice_retention_days = int(os.getenv("BILLING_INVOICE_RETENTION_DAYS", "365"))
 
 
 settings = Settings()
