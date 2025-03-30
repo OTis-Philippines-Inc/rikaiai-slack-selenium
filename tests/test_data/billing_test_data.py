@@ -1,5 +1,12 @@
 """Test data for billing settings tests."""
 
+# Public beta release information
+PUBLIC_BETA_INFO = {
+    'status': 'public beta',
+    'free_points': '200000',  # 200k billable points during beta
+    'contact_email': '[email protected]'
+}
+
 # Valid test data
 VALID_CARD_DATA = {
     'visa': {
@@ -78,6 +85,7 @@ PLAN_DATA = {
     'trial': {
         'name': 'Trial Plan',
         'price': 'FREE',
+        'billing_type': 'One Time',
         'features': [
             '50k billable points (one-time)',
             'Basic support',
@@ -89,6 +97,8 @@ PLAN_DATA = {
     'paid': {
         'name': 'Paid Plan',
         'price': '$7.99',
+        'billing_type': 'Monthly',
+        'tax_note': 'Tax / VAT / GST not included',
         'features': [
             '200k billable points base',
             'Priority support',
@@ -107,7 +117,9 @@ BILLABLE_POINTS_CONFIG = {
     'first_translation': 0.0,
     'second_translation': 0.5,
     'subsequent_translations': 0.25,
-    'edited_message': 0.125
+    'edited_message': 0.125,
+    'points_per_character': 1.0,
+    'trim_on_limit': True
 }
 
 # Error messages
@@ -120,7 +132,8 @@ ERROR_MESSAGES = {
     'payment_failed': 'Payment processing failed',
     'plan_change_failed': 'Failed to change plan',
     'points_limit_exceeded': 'Translation limit exceeded',
-    'unsupported_region': 'Service not available in your region'
+    'unsupported_region': 'Service not available in your region',
+    'beta_limit_exceeded': 'Beta period points limit exceeded'
 }
 
 # Success messages
@@ -130,7 +143,8 @@ SUCCESS_MESSAGES = {
     'address_updated': 'Address updated successfully',
     'plan_changed': 'Plan changed successfully',
     'subscription_cancelled': 'Subscription cancelled successfully',
-    'points_limit_updated': 'Translation limits updated successfully'
+    'points_limit_updated': 'Translation limits updated successfully',
+    'beta_points_increased': 'Beta points limit increased successfully'
 }
 
 # Supported regions
@@ -140,5 +154,7 @@ SUPPORTED_REGIONS = [
 
 # Unsupported regions
 UNSUPPORTED_REGIONS = [
-    'EU', 'EEA', 'CN', 'RU', 'IR', 'KP', 'SY', 'YE', 'SO', 'SS'
+    'EU', 'EEA', 'CN', 'RU', 'IR', 'KP', 'SY', 'YE', 'SO', 'SS',
+    'AF', 'AR', 'BY', 'BI', 'CF', 'CU', 'IQ', 'LB', 'LY', 'ML',
+    'MD', 'NE', 'RS', 'SD'
 ] 
