@@ -11,7 +11,8 @@ from actions.billingSettingsModal.billing import BillingSettingsModal
 from utilities.playback import Playback
 from tests.test_data.billing_test_data import (
     VALID_CARD_DATA, VALID_ADDRESS_DATA, INVALID_CARD_DATA,
-    INVALID_ADDRESS_DATA, PLAN_DATA, ERROR_MESSAGES, SUCCESS_MESSAGES
+    INVALID_ADDRESS_DATA, PLAN_DATA, ERROR_MESSAGES, SUCCESS_MESSAGES,
+    BILLABLE_POINTS_CONFIG, SUPPORTED_REGIONS, UNSUPPORTED_REGIONS
 )
 
 # Set up logging
@@ -105,8 +106,8 @@ class BillingSettingsModalTest(BaseCase):
         self.click(".p-billing_change_plan_button")
         self.wait(2)
         
-        # Select a new plan
-        self.click(".p-billing_plan_option[data-plan='premium']")
+        # Select paid plan
+        self.click(".p-billing_plan_option[data-plan='paid']")
         self.wait(2)
         
         # Confirm plan change
@@ -248,30 +249,37 @@ class BillingSettingsModalTest(BaseCase):
 
     @pytest.mark.plan
     def test_plan_upgrade_downgrade(self):
-        """Test upgrading and downgrading plans.
+        """Test upgrading and downgrading between plans.
         
         Category: Plan Management
         """
         self.record.start_recording("test_plan_upgrade_downgrade")
         self.billing.open_billing_settings(self)
         
-        # Test upgrade
-        self.click(".p-billing_change_plan_button")
-        self.wait(2)
-        self.click(".p-billing_plan_option[data-plan='premium']")
-        self.wait(2)
-        self.click(".p-billing_confirm_plan_change")
-        self.wait(5)
-        self.assert_element_visible(".p-billing_plan_change_success", timeout=10)
+        # Start with trial plan
+        self.assert_text("Trial Plan", ".p-billing_plan_type")
         
-        # Test downgrade
+        # Upgrade to paid plan
         self.click(".p-billing_change_plan_button")
         self.wait(2)
-        self.click(".p-billing_plan_option[data-plan='basic']")
+        self.click(".p-billing_plan_option[data-plan='paid']")
         self.wait(2)
         self.click(".p-billing_confirm_plan_change")
         self.wait(5)
-        self.assert_element_visible(".p-billing_plan_change_success", timeout=10)
+        
+        # Verify upgrade success
+        self.assert_text("Paid Plan", ".p-billing_plan_type")
+        
+        # Downgrade back to trial
+        self.click(".p-billing_change_plan_button")
+        self.wait(2)
+        self.click(".p-billing_plan_option[data-plan='trial']")
+        self.wait(2)
+        self.click(".p-billing_confirm_plan_change")
+        self.wait(5)
+        
+        # Verify downgrade success
+        self.assert_text("Trial Plan", ".p-billing_plan_type")
         
         self.record.stop_and_save_recording()
 
@@ -520,5 +528,155 @@ class BillingSettingsModalTest(BaseCase):
         # Verify error message
         self.assert_element_visible(".p-billing_download_error", timeout=10)
         self.assert_text("Invalid date for invoice download", ".p-billing_download_error")
+        
+        self.record.stop_and_save_recording()
+
+    @pytest.mark.points
+    def test_verify_points_usage(self):
+        """Test verifying billable points usage.
+        
+        Category: Points Management
+        """
+        self.record.start_recording("test_verify_points_usage")
+        self.billing.open_billing_settings(self)
+        self.billing.verify_points_usage(self)
+        self.record.stop_and_save_recording()
+
+    @pytest.mark.points
+    def test_update_points_limits(self):
+        """Test updating billable points limits.
+        
+        Category: Points Management
+        """
+        self.record.start_recording("test_update_points_limits")
+        self.billing.open_billing_settings(self)
+        
+        # Update to a new limit
+        self.billing.update_points_limits(self, 100000)
+        self.wait(2)
+        
+        # Verify the new limit is displayed
+        self.assert_text("100,000", ".p-billing_points_limit")
+        
+        self.record.stop_and_save_recording()
+
+    @pytest.mark.points
+    def test_points_limit_warning(self):
+        """Test points limit warning display.
+        
+        Category: Points Management
+        """
+        self.record.start_recording("test_points_limit_warning")
+        self.billing.open_billing_settings(self)
+        
+        # Set a low limit
+        self.billing.update_points_limits(self, 1000)
+        self.wait(2)
+        
+        # Simulate high usage
+        self.execute_script("document.querySelector('.p-billing_points_usage').textContent = '950'")
+        self.wait(2)
+        
+        # Verify warning is displayed
+        self.assert_element_visible(".p-billing_points_warning", timeout=10)
+        
+        self.record.stop_and_save_recording()
+
+    @pytest.mark.region
+    def test_region_validation(self):
+        """Test region validation for billing.
+        
+        Category: Region Validation
+        """
+        self.record.start_recording("test_region_validation")
+        self.billing.open_billing_settings(self)
+        
+        # Test supported region
+        self.billing.verify_region_validation(self, "US")
+        self.wait(2)
+        
+        # Test unsupported region
+        self.billing.verify_region_validation(self, "CN")
+        self.wait(2)
+        
+        self.record.stop_and_save_recording()
+
+    @pytest.mark.plan
+    def test_plan_upgrade_to_paid(self):
+        """Test upgrading from trial to paid plan.
+        
+        Category: Plan Management
+        """
+        self.record.start_recording("test_plan_upgrade_to_paid")
+        self.billing.open_billing_settings(self)
+        
+        # Verify starting on trial plan
+        self.assert_text("Trial Plan", ".p-billing_plan_type")
+        
+        # Upgrade to paid plan
+        self.click(".p-billing_change_plan_button")
+        self.wait(2)
+        self.click(".p-billing_plan_option[data-plan='paid']")
+        self.wait(2)
+        
+        # Verify plan details
+        self.assert_text("$7.99", ".p-billing_plan_price")
+        self.assert_text("200k billable points base", ".p-billing_plan_features")
+        
+        # Confirm upgrade
+        self.click(".p-billing_confirm_plan_change")
+        self.wait(5)
+        
+        # Verify upgrade success
+        self.assert_text("Paid Plan", ".p-billing_plan_type")
+        self.assert_text("$7.99", ".p-billing_amount")
+        
+        self.record.stop_and_save_recording()
+
+    @pytest.mark.points
+    def test_points_calculation(self):
+        """Test billable points calculation.
+        
+        Category: Points Management
+        """
+        self.record.start_recording("test_points_calculation")
+        self.billing.open_billing_settings(self)
+        
+        # Click on points usage tab
+        self.click(".p-billing_points_tab")
+        self.wait(2)
+        
+        # Verify points breakdown
+        self.assert_element_visible(".p-billing_points_user_messages", timeout=10)
+        self.assert_element_visible(".p-billing_points_translations", timeout=10)
+        self.assert_element_visible(".p-billing_points_edits", timeout=10)
+        
+        # Verify points rates
+        self.assert_text("1.0", ".p-billing_points_rate_user")
+        self.assert_text("0.5", ".p-billing_points_rate_second")
+        self.assert_text("0.25", ".p-billing_points_rate_subsequent")
+        self.assert_text("0.125", ".p-billing_points_rate_edit")
+        
+        self.record.stop_and_save_recording()
+
+    @pytest.mark.payment
+    def test_payment_with_points_limit(self):
+        """Test payment processing with points limit.
+        
+        Category: Payment Management
+        """
+        self.record.start_recording("test_payment_with_points_limit")
+        self.billing.open_billing_settings(self)
+        
+        # Set a points limit
+        self.billing.update_points_limits(self, 1000)
+        self.wait(2)
+        
+        # Try to process payment
+        self.click(".p-billing_process_payment_button")
+        self.wait(2)
+        
+        # Verify points limit check
+        self.assert_element_visible(".p-billing_points_limit_check", timeout=10)
         
         self.record.stop_and_save_recording() 
