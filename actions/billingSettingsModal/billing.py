@@ -11,9 +11,8 @@ from seleniumbase import BaseCase
 from config.settings import settings as cfg
 from tests.test_data.billing_test_data import (
     VALID_CARD_DATA, VALID_ADDRESS_DATA, INVALID_CARD_DATA,
-    INVALID_ADDRESS_DATA, PLAN_DATA, BILLABLE_POINTS_CONFIG,
-    ERROR_MESSAGES, SUCCESS_MESSAGES, SUPPORTED_REGIONS,
-    UNSUPPORTED_REGIONS
+    INVALID_ADDRESS_DATA, PLAN_DATA, ERROR_MESSAGES, SUCCESS_MESSAGES,
+    PUBLIC_BETA_INFO
 )
 
 # Set up logging
@@ -32,11 +31,8 @@ class BillingSettingsModal:
         self.valid_card_numbers = VALID_CARD_DATA
         self.valid_addresses = VALID_ADDRESS_DATA
         self.plan_data = PLAN_DATA
-        self.points_config = BILLABLE_POINTS_CONFIG
         self.error_messages = ERROR_MESSAGES
         self.success_messages = SUCCESS_MESSAGES
-        self.supported_regions = SUPPORTED_REGIONS
-        self.unsupported_regions = UNSUPPORTED_REGIONS
 
     def open_billing_settings(self, sb):
         """Open the billing settings modal and verify it's loaded correctly.
@@ -94,11 +90,6 @@ class BillingSettingsModal:
         amount_text = amount_element.text
         self._validate_currency_format(amount_text)
         
-        # Verify points allocation
-        points_element = sb.get_element(".p-billing_points")
-        points_text = points_element.text
-        self._validate_points_format(points_text)
-        
         # Verify billing cycle
         sb.assert_element_visible(".p-billing_cycle", timeout=10)
         
@@ -108,146 +99,6 @@ class BillingSettingsModal:
         self._validate_date_format(date_text)
         
         sb.wait(2)
-
-    def verify_points_usage(self, sb):
-        """Verify points usage and breakdown.
-        
-        Args:
-            sb (BaseCase): The SeleniumBase test case instance.
-        """
-        # Click on points tab
-        sb.click(".p-billing_points_tab")
-        sb.wait(2)
-        
-        # Verify points usage table
-        sb.assert_element_visible(".p-billing_points_table", timeout=10)
-        
-        # Verify points breakdown
-        sb.assert_element_visible(".p-billing_points_user_messages", timeout=10)
-        sb.assert_element_visible(".p-billing_points_translations", timeout=10)
-        sb.assert_element_visible(".p-billing_points_edits", timeout=10)
-        
-        # Verify points rates
-        self._verify_points_rates(sb)
-        
-        sb.wait(2)
-
-    def update_points_limits(self, sb, limit):
-        """Update points usage limits.
-        
-        Args:
-            sb (BaseCase): The SeleniumBase test case instance.
-            limit (int): The new points limit to set.
-        """
-        # Click on edit limits button
-        sb.click(".p-billing_edit_limits_button")
-        sb.wait(2)
-        
-        # Enter new limit
-        sb.type(".p-billing_points_limit_input", str(limit))
-        sb.wait(1)
-        
-        # Save changes
-        sb.click(".p-billing_save_limits_button")
-        sb.wait(2)
-        
-        # Verify success message
-        sb.assert_element_visible(".p-billing_success_message", timeout=10)
-        sb.assert_text(self.success_messages['points_limit_updated'], ".p-billing_success_message")
-        
-        sb.wait(2)
-
-    def verify_region_validation(self, sb, country):
-        """Verify region validation for billing.
-        
-        Args:
-            sb (BaseCase): The SeleniumBase test case instance.
-            country (str): The country code to test.
-        """
-        # Try to update billing info with unsupported region
-        self._update_billing_address(sb, {'country': country})
-        
-        # Verify error message for unsupported region
-        sb.assert_element_visible(".p-billing_region_error", timeout=10)
-        sb.assert_text(self.error_messages['unsupported_region'], ".p-billing_region_error")
-        
-        # Update billing info with supported region
-        self._update_billing_address(sb, {'country': country})
-        
-        # Verify success message
-        sb.assert_element_visible(".p-billing_success_message", timeout=10)
-        sb.assert_text(self.success_messages['address_updated'], ".p-billing_success_message")
-        
-        sb.wait(2)
-
-    def verify_points_limits(self, sb):
-        """Verify points usage limits and warnings.
-        
-        Args:
-            sb (BaseCase): The SeleniumBase test case instance.
-        """
-        # Click on points tab
-        sb.click(".p-billing_points_tab")
-        sb.wait(2)
-        
-        # Verify points limit display
-        sb.assert_element_visible(".p-billing_points_limit", timeout=10)
-        
-        # Verify current usage
-        sb.assert_element_visible(".p-billing_points_usage", timeout=10)
-        
-        # Verify warning if near limit
-        if self._is_near_points_limit(sb):
-            sb.assert_element_visible(".p-billing_points_warning", timeout=10)
-        
-        sb.wait(2)
-
-    def _validate_points_format(self, points_text):
-        """Validate that the points text follows proper format.
-        
-        Args:
-            points_text (str): The points text to validate.
-            
-        Raises:
-            ValueError: If the points format is invalid.
-        """
-        points_pattern = r'^\d+(,\d{3})*$'
-        if not re.match(points_pattern, points_text):
-            raise ValueError(f"Invalid points format: {points_text}")
-
-    def _verify_points_rates(self, sb):
-        """Verify points rates for different operations.
-        
-        Args:
-            sb (BaseCase): The SeleniumBase test case instance.
-        """
-        # Verify user message rate
-        sb.assert_text("1.0", ".p-billing_points_user_message_rate")
-        
-        # Verify first translation rate
-        sb.assert_text("0.0", ".p-billing_points_first_translation_rate")
-        
-        # Verify second translation rate
-        sb.assert_text("0.5", ".p-billing_points_second_translation_rate")
-        
-        # Verify subsequent translations rate
-        sb.assert_text("0.25", ".p-billing_points_subsequent_translations_rate")
-        
-        # Verify edited message rate
-        sb.assert_text("0.125", ".p-billing_points_edited_message_rate")
-
-    def _is_near_points_limit(self, sb):
-        """Check if points usage is near the limit.
-        
-        Args:
-            sb (BaseCase): The SeleniumBase test case instance.
-            
-        Returns:
-            bool: True if usage is near limit, False otherwise.
-        """
-        usage = int(sb.get_text(".p-billing_points_usage").replace(",", ""))
-        limit = int(sb.get_text(".p-billing_points_limit").replace(",", ""))
-        return usage >= limit * 0.9  # 90% of limit
 
     def update_billing_info(self, sb):
         """Update billing information with validation.
@@ -327,28 +178,18 @@ class BillingSettingsModal:
         except ValueError:
             raise ValueError(f"Invalid date format: {date_text}")
 
-    def _update_billing_address(self, sb, address_data=None):
+    def _update_billing_address(self, sb):
         """Update billing address with validation.
         
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
-            address_data (dict, optional): Custom address data to use.
         """
-        if address_data is None:
-            address_data = {
-                'street': '123 Test Street',
-                'city': 'Test City',
-                'state': 'Test State',
-                'zip': '12345',
-                'country': 'United States'
-            }
-        
         address_fields = {
-            '.p-billing_address_input': address_data['street'],
-            '.p-billing_city_input': address_data['city'],
-            '.p-billing_state_input': address_data['state'],
-            '.p-billing_zip_input': address_data['zip'],
-            '.p-billing_country_input': address_data['country']
+            '.p-billing_address_input': '123 Test Street',
+            '.p-billing_city_input': 'Test City',
+            '.p-billing_state_input': 'Test State',
+            '.p-billing_zip_input': '12345',
+            '.p-billing_country_input': 'Test Country'
         }
         
         for field, value in address_fields.items():
@@ -361,16 +202,13 @@ class BillingSettingsModal:
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
         """
-        # Select card type
-        sb.click(".p-billing_card_type_select")
-        sb.wait(1)
+        sb.click(".p-billing_payment_method_button")
+        sb.wait(2)
         
-        # Enter card details
-        card_data = self.valid_card_numbers['visa']
-        sb.type(".p-billing_card_number_input", card_data['number'])
-        sb.type(".p-billing_card_expiry_input", card_data['expiry'])
-        sb.type(".p-billing_card_cvc_input", card_data['cvc'])
-        
+        # Use a valid card number
+        sb.type(".p-billing_card_number", self.valid_card_numbers['visa'])
+        sb.type(".p-billing_card_expiry", self.valid_expiry_dates[0])
+        sb.type(".p-billing_card_cvc", self.valid_cvc[0])
         sb.wait(1)
 
     def _verify_payment_history_headers(self, sb):
@@ -389,32 +227,28 @@ class BillingSettingsModal:
             sb.assert_element_visible(header, timeout=10)
 
     def _validate_payment_records(self, sb):
-        """Validate payment history records.
+        """Validate payment records in the history table.
         
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
         """
         records = sb.find_elements(".p-billing_payment_record")
-        
+        if not records:
+            raise AssertionError("No payment records found")
+            
         for record in records:
-            # Verify date format
-            date_text = record.find_element_by_css_selector(".p-billing_payment_date").text
-            self._validate_date_format(date_text)
-            
-            # Verify amount format
-            amount_text = record.find_element_by_css_selector(".p-billing_payment_amount").text
-            self._validate_currency_format(amount_text)
-            
-            # Verify status
-            status_text = record.find_element_by_css_selector(".p-billing_payment_status").text
-            assert status_text in ['Completed', 'Pending', 'Failed']
+            # Verify record has all required fields
+            self._validate_payment_record(record)
 
     def verify_plan_features(self, sb, plan_name):
-        """Verify features for a specific plan.
+        """Verify features of a specific plan.
         
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
-            plan_name (str): The name of the plan to verify.
+            plan_name (str): Name of the plan to verify.
+            
+        Raises:
+            AssertionError: If plan features are not as expected.
         """
         plan = self.plan_data[plan_name.lower()]
         
@@ -425,69 +259,72 @@ class BillingSettingsModal:
         # Verify features
         for feature in plan['features']:
             feature_selector = f".p-billing_plan_feature_{feature.lower().replace(' ', '_')}"
-            sb.assert_element_visible(feature_selector, timeout=10)
+            sb.assert_element_visible(feature_selector, timeout=5)
+            logger.info(f"Verified feature: {feature} for plan {plan_name}")
 
     def update_international_address(self, sb, country='uk'):
         """Update billing address with international format.
         
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
-            country (str): The country code to use.
+            country (str): Country code for address format.
+            
+        Raises:
+            ValueError: If country is not supported.
         """
-        # Get address data for the country
-        address_data = self.valid_addresses.get(country.lower())
-        if not address_data:
-            raise ValueError(f"No valid address data for country: {country}")
+        if country not in self.valid_addresses:
+            raise ValueError(f"Unsupported country: {country}")
+            
+        address_data = self.valid_addresses[country]
         
         # Click on edit billing info button
         sb.click(".p-billing_edit_button")
         sb.wait(2)
         
-        # Update address with international format
+        # Update address fields
         self._update_billing_address(sb, address_data)
         
         # Save changes
         sb.click(".p-billing_save_button")
-        sb.wait(2)
+        sb.wait(5)
         
         # Verify success message
         sb.assert_element_visible(".p-billing_success_message", timeout=10)
         sb.assert_text(self.success_messages['address_updated'], ".p-billing_success_message")
-        
-        sb.wait(2)
+        logger.info(f"Updated international address for {country}")
 
     def verify_network_error_handling(self, sb):
-        """Verify handling of network errors during billing operations.
+        """Verify handling of network errors during payment processing.
         
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
         """
         # Simulate network error
-        sb.execute_script("window.navigator.onLine = false;")
+        sb.execute_script("window.navigator.connection.downlink = 0")
         
-        # Try to update billing info
-        self.update_billing_info(sb)
+        # Try to update payment method
+        self._update_payment_method(sb)
         
         # Verify error message
         sb.assert_element_visible(".p-billing_network_error", timeout=10)
         sb.assert_text(self.error_messages['payment_failed'], ".p-billing_network_error")
+        logger.info("Verified network error handling")
         
-        # Restore network connection
-        sb.execute_script("window.navigator.onLine = true;")
-        
-        sb.wait(2)
+        # Re-enable network
+        sb.execute_script("window.navigator.connection.downlink = 10")
 
     def verify_plan_change_validation(self, sb):
-        """Verify validation when changing plans.
+        """Verify validation during plan changes.
         
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
         """
-        # Get current plan
+        # Get current plan details
         current_plan = sb.get_text(".p-billing_plan_type")
         current_price = sb.get_text(".p-billing_amount")
+        logger.info(f"Current plan: {current_plan}, Price: {current_price}")
         
-        # Try to change to current plan
+        # Try to select same plan
         sb.click(".p-billing_change_plan_button")
         sb.wait(2)
         sb.click(f".p-billing_plan_option[data-plan='{current_plan.lower()}']")
@@ -497,42 +334,48 @@ class BillingSettingsModal:
         sb.assert_element_visible(".p-billing_plan_warning", timeout=10)
         sb.assert_text("You are already on this plan", ".p-billing_plan_warning")
         
-        # Try to change to enterprise plan (should fail)
+        # Try to select enterprise plan
         sb.click(".p-billing_plan_option[data-plan='enterprise']")
         sb.wait(2)
         
         # Verify permission error
         sb.assert_element_visible(".p-billing_permission_error", timeout=10)
         sb.assert_text("You don't have permission to select this plan", ".p-billing_permission_error")
-        
-        sb.wait(2)
+        logger.info("Verified plan change validation")
 
     def verify_payment_history_performance(self, sb):
         """Verify performance of payment history loading.
         
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
+            
+        Returns:
+            tuple: (initial_load_time, page_load_time) in seconds
         """
         # Click on payment history tab
+        start_time = time.time()
         sb.click(".p-billing_payment_history_tab")
         sb.wait(2)
         
-        # Verify payment history table is visible
+        # Wait for payment history to load
         sb.assert_element_visible(".p-billing_payment_history_table", timeout=10)
         
-        # Check pagination if present
+        initial_load_time = time.time() - start_time
+        logger.info(f"Initial payment history load time: {initial_load_time:.2f} seconds")
+        
+        # Check pagination performance if available
+        page_load_time = None
         if sb.is_element_visible(".p-billing_pagination"):
-            # Click next page
+            page_click_start = time.time()
             sb.click(".p-billing_pagination_next")
             sb.wait(2)
-            
-            # Verify next page loaded
-            sb.assert_element_visible(".p-billing_payment_history_table", timeout=10)
+            page_load_time = time.time() - page_click_start
+            logger.info(f"Page load time: {page_load_time:.2f} seconds")
         
-        sb.wait(2)
+        return initial_load_time, page_load_time
 
     def verify_invoice_download_validation(self, sb):
-        """Verify validation of invoice download dates.
+        """Verify validation of invoice download functionality.
         
         Args:
             sb (BaseCase): The SeleniumBase test case instance.
@@ -550,12 +393,129 @@ class BillingSettingsModal:
         sb.assert_text("Invoice not available for this date", ".p-billing_download_error")
         
         # Try to download future invoice
-        future_date = datetime.now().year + 1
+        future_date = (datetime.now().year + 1).__str__()
         sb.click(f".p-billing_download_invoice_button[data-date='{future_date}-01-01']")
         sb.wait(2)
         
         # Verify error message
         sb.assert_element_visible(".p-billing_download_error", timeout=10)
         sb.assert_text("Invalid date for invoice download", ".p-billing_download_error")
+        logger.info("Verified invoice download validation")
+
+    def _update_billing_address(self, sb, address_data):
+        """Update billing address with provided data.
+        
+        Args:
+            sb (BaseCase): The SeleniumBase test case instance.
+            address_data (dict): Address data to use.
+        """
+        address_fields = {
+            '.p-billing_address_input': address_data['street'],
+            '.p-billing_city_input': address_data['city'],
+            '.p-billing_state_input': address_data['state'],
+            '.p-billing_zip_input': address_data['zip'],
+            '.p-billing_country_input': address_data['country']
+        }
+        
+        for field, value in address_fields.items():
+            sb.type(field, value)
+            sb.wait(1)
+
+    def verify_public_beta_features(self, sb):
+        """Verify public beta features and points allocation.
+        
+        Args:
+            sb (BaseCase): The SeleniumBase test case instance.
+        """
+        # Verify beta status
+        sb.assert_element_visible(".p-billing_beta_status", timeout=10)
+        sb.assert_text("Public Beta", ".p-billing_beta_status")
+        
+        # Verify beta points allocation
+        points_element = sb.get_element(".p-billing_beta_points")
+        points_text = points_element.text
+        self._validate_points_format(points_text)
+        
+        # Verify contact information
+        sb.assert_element_visible(".p-billing_contact_info", timeout=10)
+        sb.assert_text(PUBLIC_BETA_INFO['contact_email'], ".p-billing_contact_email")
+        
+        sb.wait(2)
+
+    def verify_billing_type(self, sb, plan_name):
+        """Verify billing type for a specific plan.
+        
+        Args:
+            sb (BaseCase): The SeleniumBase test case instance.
+            plan_name (str): The name of the plan to verify.
+        """
+        plan = self.plan_data[plan_name.lower()]
+        
+        # Verify billing type
+        sb.assert_text(plan['billing_type'], f".p-billing_plan_{plan_name.lower()}_billing_type")
+        
+        # Verify tax note for paid plan
+        if plan_name.lower() == 'paid':
+            sb.assert_text(plan['tax_note'], f".p-billing_plan_{plan_name.lower()}_tax_note")
+        
+        sb.wait(2)
+
+    def verify_points_trimming(self, sb):
+        """Verify points trimming when limits are exceeded.
+        
+        Args:
+            sb (BaseCase): The SeleniumBase test case instance.
+        """
+        # Set a low points limit
+        self.update_points_limits(sb, 1000)
+        
+        # Try to translate a long message
+        sb.type(".p-translation_input", "A" * 2000)  # 2000 characters
+        sb.click(".p-translate_button")
+        sb.wait(2)
+        
+        # Verify translation was trimmed
+        sb.assert_element_visible(".p-translation_trimmed_warning", timeout=10)
+        sb.assert_text("Translation trimmed to stay within points limit", ".p-translation_trimmed_warning")
+        
+        sb.wait(2)
+
+    def verify_beta_points_limit(self, sb):
+        """Verify beta period points limit handling.
+        
+        Args:
+            sb (BaseCase): The SeleniumBase test case instance.
+        """
+        # Try to exceed beta points limit
+        self.update_points_limits(sb, int(PUBLIC_BETA_INFO['free_points']) + 1000)
+        sb.wait(2)
+        
+        # Verify error message
+        sb.assert_element_visible(".p-billing_beta_error", timeout=10)
+        sb.assert_text(self.error_messages['beta_limit_exceeded'], ".p-billing_beta_error")
+        
+        # Verify contact option
+        sb.assert_element_visible(".p-billing_contact_button", timeout=10)
+        sb.assert_text("Contact Support", ".p-billing_contact_button")
+        
+        sb.wait(2)
+
+    def verify_points_per_character(self, sb):
+        """Verify points calculation per character.
+        
+        Args:
+            sb (BaseCase): The SeleniumBase test case instance.
+        """
+        # Enter test message
+        test_message = "Test message"
+        sb.type(".p-translation_input", test_message)
+        sb.click(".p-translate_button")
+        sb.wait(2)
+        
+        # Verify points calculation
+        points_element = sb.get_element(".p-translation_points")
+        points_text = points_element.text
+        expected_points = len(test_message) * self.points_config['points_per_character']
+        assert int(points_text.replace(",", "")) == expected_points
         
         sb.wait(2) 
