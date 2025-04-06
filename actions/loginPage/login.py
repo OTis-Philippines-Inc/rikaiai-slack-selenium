@@ -1,33 +1,50 @@
-import os
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
-
 from seleniumbase import BaseCase
-from config.settings import settings as cfg
+import os, sys
 
+# Add python files within project directory for import
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "config")))
+
+from otp import fetch_slack_otp
 
 class Login:
-    def direct_url(self, sb):
-        sb.maximize_window()
-        sb.open(cfg.staging_url)
-        sb.wait(5)
+    def login_to_page(self, sb: BaseCase, email: str, site: str) -> None:
+        """
+            Automates login and otp process using Google API.
 
-        sb.type("#signup_email", cfg.gmail)
-        sb.wait(5)
-        sb.click("#submit_btn")
+            ----
+            sb: test case associated with the BaseCase class.
+            email: gmail based email.
+            site: web location url.
 
-        for _ in range(60):
-            if sb.is_text_visible(
-                cfg.staging_name, ".p-ia4_home_header_menu__team_name"
-            ):
-                break
+        """
+        # Open Slack login page
+        sb.get(site)
+
+        # Enter login credentials
+        sb.type('input[name="email"]', email)
+        sb.click('button[type="submit"]')
+
+        # Fetch OTP code from email
+        otp_code: str = fetch_slack_otp().replace("-", "")
+        for i, digit in enumerate(otp_code, start=1):
+            selector = f"[aria-label='digit {i} of 6']" 
+            sb.click(selector)
+            sb.send_keys(selector, digit)
             sb.wait(1)
 
-        sb.assert_text(
-            cfg.staging_name,
-            ".p-ia4_home_header_menu__team_name",
-            timeout=10,
-        )
+        sb.wait(3)
 
-        sb.wait(10)
+        # Clicked on workspace
+        sb.execute_script("document.querySelector('a').removeAttribute('target')")
+        element: object = sb.find_element('a[aria-label="Open RikaiAI (Staging - Numbers00)"')
+        workspace: str = element.get_attribute("href")
+
+        # Open workspace
+        sb.get(workspace)
+        element = sb.find_element("xpath", "//a[contains(text(), 'use Slack in your browser')]")
+        workspace = element.get_attribute("href")
+        sb.get(workspace)
+
+        sb.sleep(5)
+
