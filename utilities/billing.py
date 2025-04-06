@@ -17,7 +17,7 @@ class Billing:
         self.bill: dict = None
        
     def view_bill(self) -> object:
-        self.input_textbox("/billing-rikaiai")
+        self.sender.input_textbox("/billing-rikaiai")
         self.driver.send_keys("div[role='textbox']", Keys.ENTER)
            
         # Get parent and html of the tag
@@ -52,7 +52,7 @@ class Billing:
             channel: name of channel in slack.
         """
         
-        return float(channel_bill[channel])
+        return float(self.bill[channel])
     
     def compute_score(self, msg: str, status: int) -> float:
         """
