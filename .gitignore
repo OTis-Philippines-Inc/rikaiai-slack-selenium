@@ -9,6 +9,16 @@
 # $ git config --global mergetool.keepBackup false
 *.orig
 
+## Virtual venv ## 
+.venv/
+
+## Assets, Recordings, Test Results, credentials secrets
+*assets/
+*recordings/
+*.html
+.credentials/
+.env
+
 # Created by git when using merge tools for conflicts
 *.BACKUP.*
 *.BASE.*

@@ -9,7 +9,6 @@ class Settings:
     def __init__(self):
         self.staging_url = os.getenv("STAGING_URL")
         self.gmail = os.getenv("GMAIL")
-        self.password = os.getenv("GMAIL_PASSWORD")
         self.staging_name = os.getenv("STAGING_NAME")
 
 

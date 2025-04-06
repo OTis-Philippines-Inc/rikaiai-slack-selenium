@@ -14,15 +14,24 @@ python -m venv .venv
 3. Activate the virtual environment:
 On Windows, run:
 ```sh
-source rikaiai-slack-selenium-venv/Scripts/activate
+source .venv/Scripts/activate
+```
+or
+```sh
+.venv/Scripts/activate
 ```
 On macOS and Linux, run:
 ```sh 
-source rikaiai-slack-selenium-venv/bin/activate
+source .venv/bin/activate
 ```
 4. Install the required dependencies by running the following command:
 ```sh
 pip install -r requirements.txt
+```
+
+If there's an error after installing the requirements.txt, try running this if you don't have the latest version of pip. Then install the requirements again.
+```sh
+python.exe -m pip install --upgrade pip
 ```
 
 ## Running the automation testing scripts
