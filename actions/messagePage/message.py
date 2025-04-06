@@ -225,7 +225,8 @@ class Message:
             channel: name of channel in slack.
         """
         self._traverse_to_channel(channel)
-        self.sb.scroll_to_bottom()
+        self.sb.refresh_page()
+        self.sb.wait(5)
 
         self._find_message(username, index, self._scroll_to_message)
         self.sb.sleep(5)
