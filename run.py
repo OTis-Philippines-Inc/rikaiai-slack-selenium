@@ -10,4 +10,4 @@ if not os.path.exists("api/token.json"):
 print("---> Verifying Gmail Account")
 subprocess.run(["python3", "api/generate_token.py"])
 print("---> Running Test")
-subprocess.run(["pytest", "tests", "--headed", "--" + settings.BROWSER])
+subprocess.run(["pytest", "tests", "--headed", "--firefox"])
