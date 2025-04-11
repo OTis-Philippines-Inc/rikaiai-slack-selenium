@@ -1,6 +1,5 @@
 import sys, os, re
 from selenium.webdriver.common.keys import Keys
-import logging
 from seleniumbase import BaseCase
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "actions", "messagePage")))
@@ -17,7 +16,7 @@ class Billing:
         self.bill: dict = None
        
     def view_bill(self) -> object:
-        self.input_textbox("/billing-rikaiai")
+        self.sender.input_textbox("/billing-rikaiai")
         self.driver.send_keys("div[role='textbox']", Keys.ENTER)
            
         # Get parent and html of the tag
