@@ -29,14 +29,15 @@ CHANNEL: list = [
 
 # Text that will be used for testing
 MSG_INPUT: list = [
-        (0, "this is a test", 2), # Message Location, Message, Translation Count (0, 1, 2)
-        (1, "this is the second", 2)
+        (0, "this is a test", 2, "English", ["Korean", "Japanese"], True), # Message Location, Message, Translation Count (0, 1, 2), Source Language, Target, and Translate
+        (1, "this is the second", 2, "English", ["Korean", "Japanese"], False)
     ]
 
 # Project Context
 DIR_PATH: str = os.path.join(os.path.dirname(__file__), "..", "api")
 DATE_FORMAT: str ="%a, %d %b %Y %H:%M:%S %z"
 MIN_DATE: object = datetime.min.replace(tzinfo=timezone.utc)
+
 
 # Get data from .env file as dictionary
 CONFIG: dict = dotenv_values(".env")
